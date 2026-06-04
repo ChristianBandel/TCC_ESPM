@@ -1,0 +1,53 @@
+projeto:
+  nome: "TCC ESPM - Petróleo e Conflitos"
+  frequencia: "semanal"  # diário é possível na API, mas conflitos agregam melhor por semana
+
+petroleo:
+  commodity: "BRENT_CRUDE_USD"
+  data_inicio: "2015-01-01"
+  intervalo: "1w"  # 1d, 1w, 1m na Oil Price API
+  api_base: "https://api.oilpriceapi.com/v1"
+
+conflitos:
+  fonte_primaria: "ucdp_ged"  # ucdp_ged | ucdp_prio_csv | csv_manual
+  ged_csv_padrao: "1_Coleta_Dados/GEDEvent_v25_1.csv"
+  data_inicio: 2015
+  api_version: "25.1"
+  api_base: "https://ucdpapi.pcr.uu.se/api"
+
+indicadores:
+  data_inicio: "2015-01-01"
+  # yfinance: vix, dxy, wti, sp500, ouro
+  # FRED (opcional, FRED_API_KEY no .env): dxy, inflacao, wti/brent
+
+preparacao:
+  janela_volatilidade_semanas: 4
+  horizonte_previsao_semanas: 4
+  usar_preco_nivel: false  # false = evita vazamento; usa retornos/vol do Brent
+
+modelagem:
+  test_size: 0.2
+  random_state: 42
+  # classificacao principal: direcao do petroleo (mais alinhado ao TCC)
+  alvo_classificacao: "direcao_futura"  # direcao_futura | classe_volatilidade
+  limiar_direcao_pct: 0.02
+  classes_volatilidade:
+    - baixa
+    - media
+    - alta
+  classes_direcao:
+    - cai
+    - estavel
+    - sobe
+
+caminhos:
+  raw_petroleo: "dados/raw/petroleo_brent_semanal.csv"
+  raw_conflitos: "dados/raw/conflitos_semanal.csv"
+  raw_conflitos_manual: "dados/raw/conflitos_manual.csv"
+  raw_indicadores: "dados/raw/indicadores_macro_semanal.csv"
+  dataset_ml: "dados/processed/dataset_ml.parquet"
+  dataset_ml_csv: "dados/processed/dataset_ml.csv"
+  modelo_classificador: "dados/models/classificador_volatilidade.joblib"
+  modelo_regressor: "dados/models/regressor_retorno_petroleo.joblib"
+  metadados: "dados/models/metadados_modelo.json"
+  graficos_metricas: "dados/models/graficos_metricas.json"

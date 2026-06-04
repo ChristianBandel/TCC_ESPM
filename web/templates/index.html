@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TCC ESPM — Petroleo, Conflitos & IA</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>TCC ESPM — <span>Petroleo</span> & Conflitos</h1>
+      <p class="subtitle">
+        Pipeline de dados UCDP + Brent, modelagem de volatilidade e cenarios gerados por
+        <strong>Groq AI</strong> (JSON) ou amostragem aleatoria — sem formulario manual.
+      </p>
+      <div class="badge-row">
+        <span id="badge-models" class="badge warn">Verificando...</span>
+        <span id="badge-groq" class="badge">Groq</span>
+        <span id="badge-preco" class="badge ok">Brent: --</span>
+      </div>
+      <div class="preco-bar">
+        <div class="field" style="flex:1;max-width:200px">
+          <label>Preco Brent (USD) — API ao vivo ou edite</label>
+          <input type="number" step="0.01" id="preco-manual" placeholder="95.11" />
+        </div>
+        <button type="button" class="btn-secondary" id="btn-atualizar-preco">Atualizar da API</button>
+        <span id="preco-fonte" class="hint" style="margin:0;align-self:end"></span>
+      </div>
+    </header>
+
+    <div class="grid grid-2">
+      <section class="card">
+        <h2><span class="num">1</span> Coleta & pipeline</h2>
+        <p class="hint">Execute apos ter GED e token de petroleo no .env</p>
+        <div class="btn-row">
+          <button type="button" class="btn-secondary" id="btn-petroleo">Petroleo</button>
+          <button type="button" class="btn-secondary" id="btn-conflitos">Conflitos</button>
+          <button type="button" class="btn-secondary" id="btn-indicadores">Indicadores</button>
+          <button type="button" class="btn-secondary" id="btn-preparar">Preparar</button>
+          <button type="button" class="btn-secondary" id="btn-treinar">Treinar ML</button>
+          <button type="button" class="btn-primary" id="btn-pipeline">Pipeline ML</button>
+        </div>
+        <pre id="log"></pre>
+      </section>
+
+      <section class="card">
+        <h2><span class="num">2</span> Cenarios (Groq / aleatorio)</h2>
+        <p class="hint">
+          A IA devolve JSON com tensoes geopoliticas plausiveis. Chave em
+          <a href="https://console.groq.com/keys" target="_blank" rel="noopener" style="color:var(--accent)">console.groq.com</a>
+          → <code>GROQ_API_KEY</code> no .env
+        </p>
+        <div class="field-row">
+          <div class="field">
+            <label>Quantidade</label>
+            <select id="qtd-cenarios">
+              <option value="3" selected>3</option>
+              <option value="5">5</option>
+              <option value="8">8</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Modo (oculto)</label>
+            <select id="modo-geracao" style="display:none">
+              <option value="auto">auto</option>
+              <option value="groq">groq</option>
+              <option value="aleatorio">aleatorio</option>
+            </select>
+            <label style="visibility:hidden">x</label>
+            <span style="font-size:0.8rem;color:var(--muted)">auto = Groq se houver chave</span>
+          </div>
+        </div>
+        <div class="field tema-input">
+          <label>Tema opcional (ex.: Oriente Medio, Taiwan, Sahel)</label>
+          <input type="text" id="tema-groq" placeholder="Deixe vazio para variar regioes..." />
+        </div>
+        <div class="btn-row">
+          <button type="button" class="btn-ai" id="btn-gerar-groq">Gerar com Groq IA</button>
+          <button type="button" class="btn-secondary" id="btn-gerar-auto">Auto</button>
+          <button type="button" class="btn-secondary" id="btn-gerar-rand">Aleatorio</button>
+          <button type="button" class="btn-primary" id="btn-prever-todos">Prever todos</button>
+        </div>
+        <div id="cenarios-list" class="cenarios-list">
+          <div class="empty-cenarios">Gere cenarios para comecar</div>
+        </div>
+      </section>
+    </div>
+
+    <section class="card" style="margin-top:1.25rem">
+      <h2><span class="num">3</span> Impacto no petroleo (modelo ML)</h2>
+      <p class="hint">Clique em um cenario acima para ver volatilidade e preco projetado</p>
+      <div id="result-panel" class="result-panel"></div>
+    </section>
+
+    <section class="card metrics-section" style="margin-top:1.25rem">
+      <h2><span class="num">4</span> Qualidade do modelo</h2>
+      <p class="hint" id="metricas-interpretacao">Treine o modelo para ver acuracia, R² e graficos.</p>
+      <div class="metrics-kpis" id="metrics-kpis"></div>
+      <div class="charts-grid">
+        <div class="chart-box"><h3>Acuracia / F1 por classe</h3><canvas id="chart-f1"></canvas></div>
+        <div class="chart-box"><h3>Matriz de confusao</h3><canvas id="chart-confusion"></canvas></div>
+        <div class="chart-box"><h3>Retorno real vs previsto (teste)</h3><canvas id="chart-retornos"></canvas></div>
+        <div class="chart-box"><h3>Distribuicao das previsoes</h3><canvas id="chart-dist"></canvas></div>
+      </div>
+      <button type="button" class="btn-secondary" id="btn-recarregar-metricas" style="margin-top:0.75rem">Atualizar metricas</button>
+    </section>
+  </div>
+  <script src="/static/metrics.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>
