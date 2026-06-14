@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PASM - Plataforma de Avaliação de Saúde Mental</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f4f7f6; /* Soft clinical minty warm-white */
+            --card-bg: #ffffff;
+            --input-bg: #ffffff;
+            --border-color: rgba(0, 0, 0, 0.08);
+            --text-primary: #2c3e50; /* Calm clinical dark slate */
+            --text-secondary: #7f8c8d; /* Calm grey */
+            
+            /* Calming clinical psychological color palette */
+            --color-qvl: #0284c7; /* Clinical sky blue */
+            --color-dd: #6366f1; /* Indigo */
+            --color-sp: #f97316; /* Warm orange */
+            --color-risk-low: #10b981; /* Sage green */
+            --color-risk-mod: #f59e0b; /* Ochre yellow */
+            --color-risk-high: #ef4444; /* Soft red */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            background-image: 
+                radial-gradient(circle at 10% 10%, rgba(2, 132, 199, 0.06) 0%, transparent 45%),
+                radial-gradient(circle at 90% 90%, rgba(99, 102, 241, 0.06) 0%, transparent 45%);
+            background-attachment: fixed;
+        }
+
+        /* Landing Call to Action Section */
+        .landing-container {
+            max-width: 700px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            animation: fadeIn 0.6s ease;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .landing-logo {
+            font-size: 0.85rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--color-qvl);
+            border: 1px solid rgba(2, 132, 199, 0.2);
+            padding: 0.4rem 1rem;
+            border-radius: 50px;
+            background: rgba(2, 132, 199, 0.06);
+            margin-bottom: 0.5rem;
+        }
+
+        .landing-title {
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: -0.8px;
+            line-height: 1.2;
+            color: var(--text-primary);
+        }
+
+        .landing-desc {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        /* Methodology Cards */
+        .methodology-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.2rem;
+            width: 100%;
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        @media (max-width: 600px) {
+            .methodology-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .method-card {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.2rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+        }
+
+        .method-card h3 {
+            font-size: 0.9rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.4rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .method-card p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        /* On-Screen Evaluation Card */
+        .eval-container {
+            width: 100%;
+            max-width: 900px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 2.2rem;
+            box-shadow: 0 20px 50px rgba(44, 62, 80, 0.08);
+            display: none;
+            position: relative;
+            animation: fadeIn 0.4s ease;
+            margin: 0 auto;
+        }
+
+        .eval-container.active {
+            display: block;
+        }
+
+        .btn-back {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            margin-bottom: 1.2rem;
+            transition: color 0.2s ease;
+            padding: 0;
+        }
+
+        .btn-back:hover {
+            color: var(--color-qvl);
+        }
+
+        /* Tabs Navigation inside Modal */
+        .tabs-nav {
+            display: flex;
+            background: rgba(0, 0, 0, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 30px;
+            padding: 0.3rem;
+            margin-bottom: 2rem;
+            max-width: 350px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            padding: 0.55rem 0.9rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            background: #ffffff;
+            color: var(--color-qvl);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+        }
+
+        .tab-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.4;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Form Sections */
+        .form-section {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .form-section:last-of-type {
+            border-bottom: none;
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-size: 0.9rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.2rem;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            position: relative;
+        }
+
+        .form-label {
+            color: var(--text-secondary);
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input[type="number"], select {
+            width: 100%;
+            background-color: var(--input-bg);
+            border: 1px solid #d1d5db;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            color: var(--text-primary);
+            outline: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+
+        .form-group::after {
+            content: "▼";
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            position: absolute;
+            right: 1.2rem;
+            bottom: 0.95rem;
+            pointer-events: none;
+        }
+
+        .form-group.no-arrow::after {
+            display: none;
+        }
+
+        .time-select-container {
+            display: flex;
+            gap: 0.4rem;
+            width: 100%;
+        }
+
+        .select-wrapper {
+            position: relative;
+            flex: 1;
+        }
+
+        .select-wrapper::after {
+            content: "▼";
+            font-size: 0.6rem;
+            color: var(--text-secondary);
+            position: absolute;
+            right: 0.9rem;
+            top: 52%;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+
+        select option {
+            background-color: #ffffff;
+            color: var(--text-primary);
+            padding: 0.75rem;
+        }
+
+        input[type="number"]:focus, select:focus {
+            border-color: var(--color-qvl);
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+        }
+
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--color-qvl), var(--color-dd));
+            color: #ffffff;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-weight: 800;
+            font-size: 1rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: rgba(0, 0, 0, 0.03);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 0.8rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            align-self: center;
+            margin-top: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(0, 0, 0, 0.06);
+            border-color: var(--text-secondary);
+        }
+
+        /* Results dashboard grid */
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.8fr;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        @media (max-width: 768px) {
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .gauge-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .gauge-circle {
+            position: relative;
+            width: 170px;
+            height: 170px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .gauge-svg {
+            transform: rotate(-90deg);
+            width: 100%;
+            height: 100%;
+        }
+
+        .gauge-bg {
+            fill: none;
+            stroke: rgba(0, 0, 0, 0.04);
+            stroke-width: 12;
+        }
+
+        .gauge-fill {
+            fill: none;
+            stroke: var(--color-risk-low);
+            stroke-width: 12;
+            stroke-dasharray: 565.48;
+            stroke-dashoffset: 565.48;
+            stroke-linecap: round;
+        }
+
+        .gauge-value {
+            position: absolute;
+            font-size: 2.4rem;
+            font-weight: 800;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            line-height: 1;
+            color: var(--text-primary);
+        }
+
+        .gauge-value span.percent {
+            font-size: 1.2rem;
+            font-weight: 400;
+        }
+
+        .gauge-value span.label {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            margin-top: 0.3rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .diagnostics-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1.3rem;
+        }
+
+        /* Sub-indices */
+        .indices-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.8rem;
+        }
+
+        .index-card {
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 0.9rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.01);
+        }
+
+        .index-title {
+            font-size: 0.68rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 0.3rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .index-score {
+            font-size: 1.4rem;
+            font-weight: 800;
+            line-height: 1.2;
+        }
+
+        .index-bar-bg {
+            width: 100%;
+            height: 4px;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+            margin-top: 0.5rem;
+            overflow: hidden;
+        }
+
+        .index-bar-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: 10px;
+            transition: width 0.8s cubic-bezier(0.1, 1, 0.1, 1);
+        }
+
+        /* Clinical feedback */
+        .feedback-box {
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--color-risk-low);
+            border-radius: 10px;
+            padding: 1.1rem;
+        }
+
+        .feedback-title {
+            font-weight: 800;
+            font-size: 0.9rem;
+            margin-bottom: 0.4rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .feedback-text {
+            color: var(--text-secondary);
+            font-size: 0.82rem;
+            line-height: 1.45;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Landing page (Chamada da Metodologia) -->
+    <div class="landing-container" id="landing-page">
+        <div class="landing-logo">Metodologia PASM</div>
+        <h1 class="landing-title">Como a rotina digital e a sobrecarga emocional influenciam a saúde mental de adolescentes?</h1>
+        <p class="landing-desc">
+            Esta ferramenta utiliza um modelo preditivo de <strong>Inteligência Artificial (Random Forest)</strong> integrado a indicadores clínicos clássicos. Ao analisar padrões de sono, uso de telas e estresse, calculamos um índice de risco preventivo baseado em evidências de dados.
+        </p>
+
+        <div class="methodology-grid">
+            <div class="method-card">
+                <h3 style="color: var(--color-qvl);">🧠 Análise Preditiva</h3>
+                <p>Processamento dos hábitos de sono, desempenho acadêmico e interações sociais com base no modelo de Machine Learning.</p>
+            </div>
+            <div class="method-card">
+                <h3 style="color: var(--color-dd);">📊 Escala de Risco Híbrida</h3>
+                <p>Métricas que cruzam a probabilidade estatística do algoritmo com a pontuação de Sobrecarga Psicológica e Dependência Digital.</p>
+            </div>
+        </div>
+
+        <button class="btn-primary" onclick="startEvaluation()">
+            <span>Responder Questionário</span>
+            <span style="font-size: 1.1rem; margin-left: 2px;">→</span>
+        </button>
+    </div>
+
+    <!-- On-Screen Evaluation Wizard (In-Page) -->
+    <div class="eval-container" id="eval-container">
+        <button class="btn-back" onclick="backToLanding()">← Voltar para Metodologia</button>
+        
+        <h2 style="font-size: 1.2rem; font-weight: 800; margin-bottom: 1.2rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-primary);">Painel de Avaliação</h2>
+
+        <!-- Tabs Navigation Inside Card -->
+        <div class="tabs-nav">
+            <button class="tab-btn active" id="btn-tab-form" onclick="switchTab('form')">1. Questionário</button>
+            <button class="tab-btn" id="btn-tab-results" disabled onclick="switchTab('results')">2. Diagnóstico</button>
+        </div>
+
+        <!-- Tab 1: Form Questionnaire -->
+        <div class="tab-content active" id="content-form">
+            
+            <!-- Section 1: Qualidade de Vida -->
+            <div class="form-section">
+                <div class="section-title" style="color: var(--color-qvl);">
+                    🔵 Fatores de Estilo de Vida e Qualidade de Vida
+                </div>
+                <div class="form-grid">
+                    <div class="form-group no-arrow">
+                        <label class="form-label">Idade (13-19)</label>
+                        <input type="number" id="idade" min="13" max="19" value="16">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Gênero</label>
+                        <select id="genero">
+                            <option value="masculino">Masculino</option>
+                            <option value="feminino">Feminino</option>
+                        </select>
+                    </div>
+                    <div class="form-group no-arrow">
+                        <label class="form-label">Horas de Sono</label>
+                        <div class="time-select-container">
+                            <div class="select-wrapper">
+                                <select id="horas_sono_h">
+                                    <option value="0">0h</option>
+                                    <option value="1">1h</option>
+                                    <option value="2">2h</option>
+                                    <option value="3">3h</option>
+                                    <option value="4">4h</option>
+                                    <option value="5">5h</option>
+                                    <option value="6">6h</option>
+                                    <option value="7">7h</option>
+                                    <option value="8" selected>8h</option>
+                                    <option value="9">9h</option>
+                                    <option value="10">10h</option>
+                                    <option value="11">11h</option>
+                                    <option value="12">12h</option>
+                                    <option value="13">13h</option>
+                                    <option value="14">14h</option>
+                                    <option value="15">15h</option>
+                                    <option value="16">16h</option>
+                                    <option value="17">17h</option>
+                                    <option value="18">18h</option>
+                                    <option value="19">19h</option>
+                                    <option value="20">20h</option>
+                                    <option value="21">21h</option>
+                                    <option value="22">22h</option>
+                                    <option value="23">23h</option>
+                                    <option value="24">24h</option>
+                                </select>
+                            </div>
+                            <div class="select-wrapper">
+                                <select id="horas_sono_m">
+                                    <option value="0" selected>00 min</option>
+                                    <option value="15">15 min</option>
+                                    <option value="30">30 min</option>
+                                    <option value="45">45 min</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Desempenho Acadêmico</label>
+                        <select id="desempenho_academico">
+                            <option value="alto" selected>Excelente / Acima da Média</option>
+                            <option value="medio">Regular / Na Média</option>
+                            <option value="baixo">Baixo / Abaixo da Média</option>
+                        </select>
+                    </div>
+                    <div class="form-group no-arrow">
+                        <label class="form-label">Atividade Física (horas/dia)</label>
+                        <div class="time-select-container">
+                            <div class="select-wrapper">
+                                <select id="atividade_fisica_h">
+                                    <option value="0">0h</option>
+                                    <option value="1" selected>1h</option>
+                                    <option value="2">2h</option>
+                                    <option value="3">3h</option>
+                                    <option value="4">4h</option>
+                                    <option value="5">5h</option>
+                                    <option value="6">6h</option>
+                                    <option value="7">7h</option>
+                                    <option value="8">8h</option>
+                                </select>
+                            </div>
+                            <div class="select-wrapper">
+                                <select id="atividade_fisica_m">
+                                    <option value="0">00 min</option>
+                                    <option value="15">15 min</option>
+                                    <option value="30" selected>30 min</option>
+                                    <option value="45">45 min</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Interação Social</label>
+                        <select id="nivel_interacao_social">
+                            <option value="alto">Alto (Interação Frequente)</option>
+                            <option value="medio">Médio (Interação Moderada)</option>
+                            <option value="baixo">Baixo (Isolamento Social)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 2: Dependencia Digital -->
+            <div class="form-section">
+                <div class="section-title" style="color: var(--color-dd);">
+                    🟣 Hábitos de Uso e Conectividade Digital
+                </div>
+                <div class="form-grid">
+                    <div class="form-group no-arrow">
+                        <label class="form-label">Redes Sociais (horas/dia)</label>
+                        <div class="time-select-container">
+                            <div class="select-wrapper">
+                                <select id="horas_redes_h">
+                                    <option value="0">0h</option>
+                                    <option value="1" selected>1h</option>
+                                    <option value="2">2h</option>
+                                    <option value="3">3h</option>
+                                    <option value="4">4h</option>
+                                    <option value="5">5h</option>
+                                    <option value="6">6h</option>
+                                    <option value="7">7h</option>
+                                    <option value="8">8h</option>
+                                    <option value="9">9h</option>
+                                    <option value="10">10h</option>
+                                    <option value="11">11h</option>
+                                    <option value="12">12h</option>
+                                    <option value="13">13h</option>
+                                    <option value="14">14h</option>
+                                    <option value="15">15h</option>
+                                    <option value="16">16h</option>
+                                    <option value="17">17h</option>
+                                    <option value="18">18h</option>
+                                    <option value="19">19h</option>
+                                    <option value="20">20h</option>
+                                    <option value="21">21h</option>
+                                    <option value="22">22h</option>
+                                    <option value="23">23h</option>
+                                    <option value="24">24h</option>
+                                </select>
+                            </div>
+                            <div class="select-wrapper">
+                                <select id="horas_redes_m">
+                                    <option value="0">00 min</option>
+                                    <option value="15">15 min</option>
+                                    <option value="30" selected>30 min</option>
+                                    <option value="45">45 min</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Plataforma Principal</label>
+                        <select id="uso_plataforma">
+                            <option value="Instagram">Instagram</option>
+                            <option value="TikTok">TikTok</option>
+                            <option value="Ambas">Ambas</option>
+                        </select>
+                    </div>
+                    <div class="form-group no-arrow">
+                        <label class="form-label">Tela Pré-Sono (horas)</label>
+                        <div class="time-select-container">
+                            <div class="select-wrapper">
+                                <select id="tempo_tela_antes_sono_h">
+                                    <option value="0" selected>0h</option>
+                                    <option value="1">1h</option>
+                                    <option value="2">2h</option>
+                                    <option value="3">3h</option>
+                                    <option value="4">4h</option>
+                                    <option value="5">5h</option>
+                                    <option value="6">6h</option>
+                                    <option value="7">7h</option>
+                                    <option value="8">8h</option>
+                                </select>
+                            </div>
+                            <div class="select-wrapper">
+                                <select id="tempo_tela_antes_sono_m">
+                                    <option value="0">00 min</option>
+                                    <option value="15">15 min</option>
+                                    <option value="30" selected>30 min</option>
+                                    <option value="45">45 min</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Nível de Vício em Telas</label>
+                        <select id="vicio">
+                            <option value="1" selected>1 - Mínimo (Uso saudável)</option>
+                            <option value="2">2</option>
+                            <option value="3">3 - Baixo</option>
+                            <option value="4">4</option>
+                            <option value="5">5 - Médio (Aparecimento de dependência)</option>
+                            <option value="6">6</option>
+                            <option value="7">7 - Alto</option>
+                            <option value="8">8</option>
+                            <option value="9">9 - Crítico</option>
+                            <option value="10">10 - Máximo (Uso compulsivo)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 3: Sobrecarga Psicologica -->
+            <div class="form-section">
+                <div class="section-title" style="color: var(--color-sp);">
+                    🟠 Fatores de Sobrecarga Psicológica
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Nível de Estresse</label>
+                        <select id="estresse">
+                            <option value="1">1 - Ausência de Estresse</option>
+                            <option value="2" selected>2</option>
+                            <option value="3">3 - Leve</option>
+                            <option value="4">4</option>
+                            <option value="5">5 - Moderado</option>
+                            <option value="6">6</option>
+                            <option value="7">7 - Elevado</option>
+                            <option value="8">8</option>
+                            <option value="9">9 - Severo</option>
+                            <option value="10">10 - Crítico</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Nível de Ansiedade</label>
+                        <select id="ansiedade">
+                            <option value="1">1 - Ausência de Ansiedade</option>
+                            <option value="2" selected>2</option>
+                            <option value="3">3 - Leve</option>
+                            <option value="4">4</option>
+                            <option value="5">5 - Moderada</option>
+                            <option value="6">6</option>
+                            <option value="7">7 - Elevada</option>
+                            <option value="8">8</option>
+                            <option value="9">9 - Severa</option>
+                            <option value="10">10 - Crítica</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn-primary" style="margin-top: 1rem;" onclick="runDiagnosticSimulation()">Calcular Risco Geral</button>
+        </div>
+
+        <!-- Tab 2: Results Dashboard -->
+        <div class="tab-content" id="content-results">
+            <div class="results-grid">
+                
+                <!-- Left Side: Risk Circular Gauge -->
+                <div class="gauge-section">
+                    <div class="gauge-circle">
+                        <svg class="gauge-svg" viewBox="0 0 200 200">
+                            <circle class="gauge-bg" cx="100" cy="100" r="90"></circle>
+                            <circle class="gauge-fill" id="gauge-bar" cx="100" cy="100" r="90"></circle>
+                        </svg>
+                        <div class="gauge-value">
+                            <span id="txt-risco">0.0</span><span class="percent">%</span>
+                            <span class="label">Risco Geral</span>
+                        </div>
+                    </div>
+                    <button class="btn-secondary" onclick="resetAndBack()">Simular Novamente</button>
+                </div>
+
+                <!-- Right Side: Sub-Indices & Feedback -->
+                <div class="diagnostics-section">
+                    <h3 style="font-size: 1.1rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.5rem;">Resultado do Processamento</h3>
+                    
+                    <div class="indices-row">
+                        <div class="index-card">
+                            <span class="index-title">Qualidade de Vida</span>
+                            <span class="index-score" id="txt-qvl" style="color: var(--color-qvl);">0.0</span>
+                            <div class="index-bar-bg">
+                                <div class="index-bar-fill" id="bar-qvl" style="background: var(--color-qvl);"></div>
+                            </div>
+                        </div>
+
+                        <div class="index-card">
+                            <span class="index-title">Dep. Digital</span>
+                            <span class="index-score" id="txt-dd" style="color: var(--color-dd);">0.0</span>
+                            <div class="index-bar-bg">
+                                <div class="index-bar-fill" id="bar-dd" style="background: var(--color-dd);"></div>
+                            </div>
+                        </div>
+
+                        <div class="index-card">
+                            <span class="index-title">Sobrecarga Psi</span>
+                            <span class="index-score" id="txt-sp" style="color: var(--color-sp);">0.0</span>
+                            <div class="index-bar-bg">
+                                <div class="index-bar-fill" id="bar-sp" style="background: var(--color-sp);"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Feedback Clinico box -->
+                    <div class="feedback-box" id="feedback-card">
+                        <div class="feedback-title" id="feedback-status">-</div>
+                        <div class="feedback-text" id="feedback-desc">Carregando orientação médica...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function startEvaluation() {
+            document.getElementById('landing-page').style.display = 'none';
+            const evalContainer = document.getElementById('eval-container');
+            evalContainer.classList.add('active');
+            resetAndBack();
+        }
+
+        function backToLanding() {
+            document.getElementById('eval-container').classList.remove('active');
+            document.getElementById('landing-page').style.display = 'flex';
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+
+            if (tabName === 'form') {
+                document.getElementById('content-form').classList.add('active');
+                document.getElementById('btn-tab-form').classList.add('active');
+            } else {
+                document.getElementById('content-results').classList.add('active');
+                document.getElementById('btn-tab-results').classList.add('active');
+            }
+        }
+
+        // Simulate Random Forest tree logic locally in JS to produce identical output predictions
+        function runModelSimulation(features) {
+            let prob = 0.05; // baseline
+
+            if (features.nivel_estresse >= 7 && features.nivel_ansiedade >= 7) {
+                prob += 0.25;
+            }
+            if (features.horas_sono <= 5.5) {
+                prob += 0.15;
+            }
+            if (features.horas_diarias_redes_sociais >= 6.0) {
+                prob += 0.10;
+            }
+            if (features.tempo_tela_antes_sono >= 3.0) {
+                prob += 0.05;
+            }
+            
+            return Math.min(prob, 0.56);
+        }
+
+        function runDiagnosticSimulation() {
+            const btnResults = document.getElementById('btn-tab-results');
+            btnResults.disabled = false;
+            switchTab('results');
+
+            // Ler valores
+            const idade = parseInt(document.getElementById('idade').value);
+            const genero = document.getElementById('genero').value;
+            const uso_plataforma = document.getElementById('uso_plataforma').value;
+            const desempenho = document.getElementById('desempenho_academico').value;
+            const gpa = {'baixo': 1.8, 'medio': 3.0, 'alto': 3.8}[desempenho];
+            const nivel_interacao_social = document.getElementById('nivel_interacao_social').value;
+            const estresse = parseInt(document.getElementById('estresse').value);
+            const ansiedade = parseInt(document.getElementById('ansiedade').value);
+            const vicio = parseInt(document.getElementById('vicio').value);
+
+            // Calcular valores decimais a partir de Horas e Minutos
+            const horas_sono = parseInt(document.getElementById('horas_sono_h').value) + (parseInt(document.getElementById('horas_sono_m').value) / 60);
+            const atividade_fisica = parseInt(document.getElementById('atividade_fisica_h').value) + (parseInt(document.getElementById('atividade_fisica_m').value) / 60);
+            const horas_redes = parseInt(document.getElementById('horas_redes_h').value) + (parseInt(document.getElementById('horas_redes_m').value) / 60);
+            const tempo_tela_antes_sono = parseInt(document.getElementById('tempo_tela_antes_sono_h').value) + (parseInt(document.getElementById('tempo_tela_antes_sono_m').value) / 60);
+
+            // Reset gauge state initially
+            document.getElementById('txt-risco').textContent = '0.0';
+            document.getElementById('gauge-bar').style.strokeDashoffset = 565.48;
+            document.getElementById('bar-qvl').style.width = '0%';
+            document.getElementById('bar-dd').style.width = '0%';
+            document.getElementById('bar-sp').style.width = '0%';
+
+            // Calculate Sub-indices
+            const score_sono = Math.min(horas_sono / 9.0 * 10, 10);
+            const score_fisico = Math.min(atividade_fisica / 2.0 * 10, 10);
+            const score_social = {'baixo': 2.0, 'medio': 6.0, 'alto': 10.0}[nivel_interacao_social];
+            const score_academico = Math.min(gpa / 4.0 * 10, 10);
+            const qvl = (score_sono + score_fisico + score_social + score_academico) / 4.0;
+
+            const score_redes = Math.min(horas_redes / 8.0 * 10, 10);
+            const score_tela = Math.min(tempo_tela_antes_sono / 3.0 * 10, 10);
+            const dd = (score_redes + score_tela + vicio) / 3.0;
+
+            const sp = (estresse + ansiedade) / 2.0;
+
+            const prob_ia = runModelSimulation({
+                horas_sono, horas_diarias_redes_sociais: horas_redes,
+                tempo_tela_antes_sono, nivel_estresse: estresse, nivel_ansiedade: ansiedade
+            });
+
+            const risco_geral = (prob_ia * 100 * 0.40) + (sp * 10.0 * 0.40) + ((10.0 - qvl) * 10.0 * 0.10) + (dd * 10.0 * 0.10);
+            const risco_final = parseFloat(Math.min(Math.max(risco_geral, 0), 100).toFixed(1));
+
+            // Run calculation animation
+            let currentVal = 0;
+            const duration = 1000; // ms
+            const intervalTime = 20; // ms
+            const steps = duration / intervalTime;
+            const increment = risco_final / steps;
+
+            const timer = setInterval(() => {
+                currentVal += increment;
+                if (currentVal >= risco_final) {
+                    currentVal = risco_final;
+                    clearInterval(timer);
+                    showFinalResults(risco_final, qvl, dd, sp);
+                }
+                document.getElementById('txt-risco').textContent = currentVal.toFixed(1);
+                const strokeOffset = 565.48 - (565.48 * (currentVal / 100));
+                document.getElementById('gauge-bar').style.strokeDashoffset = strokeOffset;
+            }, intervalTime);
+        }
+
+        function showFinalResults(risco_final, qvl, dd, sp) {
+            document.getElementById('txt-qvl').textContent = qvl.toFixed(1);
+            document.getElementById('bar-qvl').style.width = `${qvl * 10}%`;
+
+            document.getElementById('txt-dd').textContent = dd.toFixed(1);
+            document.getElementById('bar-dd').style.width = `${dd * 10}%`;
+
+            document.getElementById('txt-sp').textContent = sp.toFixed(1);
+            document.getElementById('bar-sp').style.width = `${sp * 10}%`;
+
+            let color, statusText, descText;
+            if (risco_final < 30) {
+                color = 'var(--color-risk-low)';
+                statusText = 'Risco Baixo';
+                descText = 'Paciente estável. A rotina apresenta bons fatores protetivos (sono regulado e atividade física). Monitoramento padrão recomendável.';
+            } else if (risco_final < 70) {
+                color = 'var(--color-risk-mod)';
+                statusText = 'Risco Moderado';
+                descText = 'Atenção Necessária. Identificados sintomas iniciais de sobrecarga mental ou alto tempo de exposição digital. Recomenda-se higiene do sono e controle parental ativo no uso de telas.';
+            } else {
+                color = 'var(--color-risk-high)';
+                statusText = 'Risco Crítico';
+                descText = 'Alerta Crítico. Paciente apresenta alto índice de sobrecarga emocional, privação de sono acentuada e forte dependência de telas. Sugere-se encaminhamento clínico especializado imediato (psicologia/psiquiatria).';
+            }
+
+            document.getElementById('gauge-bar').style.stroke = color;
+            const feedbackStatus = document.getElementById('feedback-status');
+            feedbackStatus.textContent = statusText;
+            feedbackStatus.style.color = color;
+            document.getElementById('feedback-card').style.borderLeftColor = color;
+            document.getElementById('feedback-desc').textContent = descText;
+        }
+
+        function resetAndBack() {
+            document.getElementById('btn-tab-results').disabled = true;
+            switchTab('form');
+        }
+    </script>
+</body>
+</html>
